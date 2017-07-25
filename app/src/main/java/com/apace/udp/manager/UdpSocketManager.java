@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * UDP Socket的管理工具
  */
 public class UdpSocketManager {
     private static Map<Integer, DatagramSocket> sDatagramSockets = new HashMap();

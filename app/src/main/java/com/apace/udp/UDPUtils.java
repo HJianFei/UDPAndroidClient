@@ -1,12 +1,11 @@
 package com.apace.udp;
 
-import com.apace.udp.bean.TargetInfo;
-import com.apace.udp.bean.TcpMsg;
-import com.apace.udp.bean.UdpMsg;
-import com.apace.udp.listener.UdpClientListener;
+import com.apace.udp.entity.BaseMsg;
+import com.apace.udp.entity.TargetInfo;
+import com.apace.udp.entity.UdpMsg;
+import com.apace.udp.listener.UdpListener;
 import com.apace.udp.manager.UdpSocketManager;
 import com.apace.udp.utils.CharsetUtil;
-import com.apace.udp.utils.XSocketLog;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -20,28 +19,28 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * udp 客户端
+ * UDP工具类
  */
-public class XUdp  {
-    private static final String TAG = "XUdp";
+public class UDPUtils {
+
     protected UdpClientConfig mUdpClientConfig;
-    protected List<UdpClientListener> mUdpClientListeners;
+    protected List<UdpListener> mUdpListeners;
     private DatagramSocket datagramSocket;
     private SendThread sendThread;
     private ReceiveThread receiverThread;
 
-    private XUdp() {
+    private UDPUtils() {
         super();
     }
 
-    public static XUdp getUdpClient() {
-        XUdp client = new XUdp();
+    public static UDPUtils getUdpClient() {
+        UDPUtils client = new UDPUtils();
         client.init();
         return client;
     }
 
     private void init() {
-        mUdpClientListeners = new ArrayList<>();
+        mUdpListeners = new ArrayList<>();
         mUdpClientConfig = new UdpClientConfig.Builder().create();
     }
 
@@ -55,13 +54,11 @@ public class XUdp  {
     public void startUdpServer() {
         if (!getReceiveThread().isAlive()) {
             getReceiveThread().start();
-            XSocketLog.d(TAG, "udp server started");
         }
     }
 
     public void stopUdpServer() {
         getReceiveThread().interrupt();
-        notifyStopListener();
     }
 
     public boolean isUdpServerRuning() {
@@ -117,8 +114,7 @@ public class XUdp  {
                 }
                 datagramSocket.setSoTimeout((int) mUdpClientConfig.getReceiveTimeout());
             } catch (SocketException e) {
-//                e.printStackTrace();
-                notifyErrorListener("udp create socket error", e);
+                e.printStackTrace();
                 datagramSocket = null;
             }
             return datagramSocket;
@@ -154,17 +150,9 @@ public class XUdp  {
                 getMsgQueue().put(tcpMsg);
                 return true;
             } catch (InterruptedException e) {
-//                e.printStackTrace();
+                e.printStackTrace();
             }
             return false;
-        }
-
-        public boolean cancel(UdpMsg packet) {
-            return getMsgQueue().remove(packet);
-        }
-
-        public boolean cancel(int tcpMsgID) {
-            return getMsgQueue().remove(new UdpMsg(tcpMsgID));
         }
 
         @Override
@@ -174,10 +162,8 @@ public class XUdp  {
                 return;
             }
             try {
-                while (!Thread.interrupted()
-                        && (msg = getMsgQueue().take()) != null) {
+                while (!Thread.interrupted() && (msg = getMsgQueue().take()) != null) {
                     setSendingMsg(msg);//设置正在发送的
-                    XSocketLog.d(TAG, "udp send msg=" + msg);
                     byte[] data = msg.getSourceDataBytes();
                     if (data == null) {//根据编码转换消息
                         data = CharsetUtil.stringToData(msg.getSourceDataString(), mUdpClientConfig.getCharsetName());
@@ -190,14 +176,11 @@ public class XUdp  {
                             try {
                                 msg.setTime();
                                 datagramSocket.send(packet);
-                                notifySendedListener(msg);
                             } catch (IOException e) {
-//                                e.printStackTrace();
-                                notifyErrorListener("发送消息失败", e);
+                                e.printStackTrace();
                             }
                         } catch (SocketException e) {
-                            notifyErrorListener("发送消息失败", e);
-//                            e.printStackTrace();
+                            e.printStackTrace();
                         }
                     }
                 }
@@ -215,23 +198,17 @@ public class XUdp  {
             }
             byte[] buff = new byte[1024];
             DatagramPacket pack = new DatagramPacket(buff, buff.length);
-            notifyStartListener();
             while (!Thread.interrupted()) {
                 try {
                     getDatagramSocket().receive(pack);
                     byte[] res = Arrays.copyOf(buff, pack.getLength());
-                    XSocketLog.d(TAG, "udp receive byte=" + Arrays.toString(res));
                     UdpMsg udpMsg = new UdpMsg(res, new TargetInfo(pack.getAddress().getHostAddress(), pack.getPort()),
-                            TcpMsg.MsgType.Receive);
+                            BaseMsg.MsgType.Receive);
                     udpMsg.setTime();
                     String msgstr = CharsetUtil.dataToString(res, mUdpClientConfig.getCharsetName());
                     udpMsg.setSourceDataString(msgstr);
-                    XSocketLog.d(TAG, "udp receive msg=" + udpMsg);
-                    notifyReceiveListener(udpMsg);
                 } catch (IOException e) {
                     if (!(e instanceof SocketTimeoutException)) {//不是超时报错
-                        notifyErrorListener(e.getMessage(), e);
-                        notifyStopListener();
                     }
                 }
             }
@@ -242,40 +219,20 @@ public class XUdp  {
         mUdpClientConfig = udpClientConfig;
     }
 
-    public void addUdpClientListener(UdpClientListener listener) {
-        if (mUdpClientListeners.contains(listener)) {
+    public void addUdpClientListener(UdpListener listener) {
+        if (mUdpListeners.contains(listener)) {
             return;
         }
-        this.mUdpClientListeners.add(listener);
+        this.mUdpListeners.add(listener);
     }
 
-    public void removeUdpClientListener(UdpClientListener listener) {
-        this.mUdpClientListeners.remove(listener);
-    }
-
-    private void notifyReceiveListener(final UdpMsg msg) {
-
-    }
-
-    private void notifyStartListener() {
-
-    }
-
-    private void notifyStopListener() {
-
-    }
-
-    private void notifySendedListener(final UdpMsg msg) {
-
-    }
-
-    private void notifyErrorListener(final String msg, final Exception e) {
-
+    public void removeUdpClientListener(UdpListener listener) {
+        this.mUdpListeners.remove(listener);
     }
 
     @Override
     public String toString() {
-        return "XUdp{" +
+        return "UDPUtils{" +
                 "datagramSocket=" + datagramSocket +
                 '}';
     }

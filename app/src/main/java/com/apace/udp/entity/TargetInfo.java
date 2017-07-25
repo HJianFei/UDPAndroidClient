@@ -1,8 +1,9 @@
-package com.apace.udp.bean;
-
+package com.apace.udp.entity;
 
 /**
+ * 发送源的IP地址以及端口号
  *
+ * @author Administrator
  */
 public class TargetInfo {
     private String ip;

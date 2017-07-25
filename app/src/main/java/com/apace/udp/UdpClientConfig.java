@@ -3,7 +3,7 @@ package com.apace.udp;
 import com.apace.udp.utils.CharsetUtil;
 
 /**
- * udp配置
+ * UDP配置
  */
 public class UdpClientConfig {
     private String charsetName = CharsetUtil.UTF_8;//默认编码

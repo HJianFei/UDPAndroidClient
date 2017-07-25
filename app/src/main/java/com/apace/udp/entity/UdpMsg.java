@@ -1,8 +1,11 @@
-package com.apace.udp.bean;
+package com.apace.udp.entity;
 
 /**
+ * UDP数据接收，发送实体类
+ *
+ * @author Administrator
  */
-public class UdpMsg extends TcpMsg {
+public class UdpMsg extends BaseMsg {
 
     public UdpMsg(byte[] data, TargetInfo target, MsgType type) {
         super(data, target, type);
@@ -10,9 +13,5 @@ public class UdpMsg extends TcpMsg {
 
     public UdpMsg(String data, TargetInfo target, MsgType type) {
         super(data, target, type);
-    }
-
-    public UdpMsg(int id) {
-        super(id);
     }
 }
