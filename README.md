@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # XAndroidSocket
 Socket封装，支持TCP/UDP客户端和服务端，支持自定义粘包处理、验证处理、解析处理。
 ##使用
@@ -84,3 +85,7 @@ License
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
+=======
+# UDPAndroidClient
+UDPAndroid客户端
+>>>>>>> c1dda1eafb7f90b9086947685660082e69001230
