@@ -55,7 +55,7 @@ public class BaseMsg {
                 ", sourceDataString='" + sourceDataString + '\'' +
                 ", target=" + target +
                 ", time=" + time +
-                ", msgtyoe=" + mMsgType +
+                ", msgtype=" + mMsgType +
                 '}';
     }
 

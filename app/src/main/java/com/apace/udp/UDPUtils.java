@@ -65,18 +65,13 @@ public class UDPUtils {
         return getReceiveThread().isAlive();
     }
 
-    public void sendMsg(UdpMsg msg, boolean isReply) {
+    public void sendMsg(UdpMsg msg) {
         if (!getSendThread().isAlive()) {//开启发送线程
             getSendThread().start();
         }
         getSendThread().enqueueUdpMsg(msg);
-        if (isReply) {//根据是否需要回复，开启接受线程
-            startUdpServer();
-        }
-    }
+        startUdpServer();
 
-    public void sendMsg(UdpMsg msg) {
-        sendMsg(msg, false);
     }
 
     private SendThread getSendThread() {
@@ -142,8 +137,7 @@ public class UDPUtils {
         }
 
         public boolean enqueueUdpMsg(final UdpMsg tcpMsg) {
-            if (tcpMsg == null || getSendingMsg() == tcpMsg
-                    || getMsgQueue().contains(tcpMsg)) {
+            if (tcpMsg == null || getSendingMsg() == tcpMsg || getMsgQueue().contains(tcpMsg)) {
                 return false;
             }
             try {
@@ -164,15 +158,14 @@ public class UDPUtils {
             try {
                 while (!Thread.interrupted() && (msg = getMsgQueue().take()) != null) {
                     setSendingMsg(msg);//设置正在发送的
-                    byte[] data = msg.getSourceDataBytes();
-                    if (data == null) {//根据编码转换消息
-                        data = CharsetUtil.stringToData(msg.getSourceDataString(), mUdpClientConfig.getCharsetName());
+                    byte[] newary = msg.getSourceDataBytes();
+                    if (newary == null) {//根据编码转换消息
+                        newary = CharsetUtil.stringToData(msg.getSourceDataString(), mUdpClientConfig.getCharsetName());
                     }
-                    if (data != null && data.length > 0) {
+                    if (newary != null && newary.length > 0) {
                         try {
                             TargetInfo mTargetInfo = msg.getTarget();
-                            DatagramPacket packet = new DatagramPacket(data, data.length,
-                                    new InetSocketAddress(mTargetInfo.getIp(), mTargetInfo.getPort()));
+                            DatagramPacket packet = new DatagramPacket(newary, newary.length, new InetSocketAddress(mTargetInfo.getIp(), mTargetInfo.getPort()));
                             try {
                                 msg.setTime();
                                 datagramSocket.send(packet);
@@ -185,7 +178,7 @@ public class UDPUtils {
                     }
                 }
             } catch (InterruptedException e) {
-//                e.printStackTrace();
+                e.printStackTrace();
             }
         }
     }
@@ -207,11 +200,23 @@ public class UDPUtils {
                     udpMsg.setTime();
                     String msgstr = CharsetUtil.dataToString(res, mUdpClientConfig.getCharsetName());
                     udpMsg.setSourceDataString(msgstr);
+                    notifyReceiveListener(udpMsg);
                 } catch (IOException e) {
                     if (!(e instanceof SocketTimeoutException)) {//不是超时报错
                     }
                 }
             }
+        }
+    }
+
+    private void notifyReceiveListener(final UdpMsg msg) {
+        for (UdpListener l : mUdpListeners) {
+            UdpListener listener = l;
+            if (listener != null) {
+                listener.onReceive(UDPUtils.this, msg);
+
+            }
+
         }
     }
 

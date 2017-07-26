@@ -36,6 +36,18 @@
         android:layout_margin="16dp"
         android:text="发送" />
 
+    <ImageView
+        android:id="@+id/select_img"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/show_dialog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="图片上传" />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_cntent"
         android:layout_width="match_parent"
