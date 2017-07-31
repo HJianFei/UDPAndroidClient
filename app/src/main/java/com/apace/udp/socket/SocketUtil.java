@@ -4,7 +4,6 @@ import com.apace.udp.UDPConfig;
 import com.apace.udp.entity.UdpMsg;
 import com.apace.udp.listener.UdpListener;
 import com.apace.udp.manager.UdpSocketManager;
-import com.apace.udp.thread.ReceiveThread;
 import com.apace.udp.thread.SendThread;
 
 import java.net.DatagramSocket;
@@ -22,10 +21,7 @@ public class SocketUtil {
     protected static UDPConfig mUDPConfig;
     private static SocketUtil socketUtil;
     private List<UdpListener> mUdpListeners;
-
     private SendThread sendThread;
-
-    private ReceiveThread receiverThread;
 
 
     /**

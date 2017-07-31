@@ -28,11 +28,10 @@ import com.apace.udp.entity.BaseMsg;
 import com.apace.udp.entity.TargetInfo;
 import com.apace.udp.entity.UdpMsg;
 import com.apace.udp.listener.UdpListener;
+import com.apace.udp.service.ReceiveService;
 import com.apace.udp.socket.SocketUtil;
-import com.apace.udp.utils.ByteUtil;
 import com.apace.udp.utils.ImageUtils;
 import com.apace.udp.utils.StringValidationUtils;
-import com.apace.udp.utils.Utils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -41,7 +40,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, UdpListener {
 
 
-    private UDPUtils udpUtils;
+    private SocketUtil udpUtils;
     private SocketUtil socketUtil;
     private EditText input_ip_port;
     private EditText input_text;
@@ -87,6 +86,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         imageView = (ImageView) findViewById(R.id.select_img);
         show_dialog = (Button) findViewById(R.id.show_dialog);
         show_dialog.setOnClickListener(this);
+        Intent intent = new Intent(this, ReceiveService.class);
+        startService(intent);
 
     }
 
@@ -95,7 +96,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onDestroy();
         if (udpUtils != null) {
             udpUtils.removeUdpClientListener(this);
-            udpUtils.stopUdpServer();
         }
     }
 
@@ -115,13 +115,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         && StringValidationUtils.validateRegex(temp2[1], StringValidationUtils.RegexPort)) {
                     targetInfo = new TargetInfo(temp2[0], Integer.parseInt(temp2[1]));
                     if (udpUtils == null) {
-                        udpUtils = UDPUtils.getUdpClient();
+                        udpUtils = SocketUtil.getSocketUtil();
                         udpUtils.addUdpClientListener(this);
                     }
                     udpUtils.config(new UDPConfig.Builder()
                             .setLocalPort(Integer.parseInt(temp2[1])).create());
-                    byte[] bytes = Utils.packBytes(System.currentTimeMillis(), 1, "192.168.1.56", "192.168.1.190", "文本", ByteUtil.getBytes(text), 0, 18);
-                    udpUtils.sendMsg(new UdpMsg(bytes, targetInfo, BaseMsg.MsgType.Send));
+                    udpUtils.sendMsg(new UdpMsg(text, targetInfo, BaseMsg.MsgType.Send));
                 }
                 break;
             case R.id.show_dialog:
@@ -265,7 +264,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         && StringValidationUtils.validateRegex(temp2[1], StringValidationUtils.RegexPort)) {
                     targetInfo = new TargetInfo(temp2[0], Integer.parseInt(temp2[1]));
                     if (udpUtils == null) {
-                        udpUtils = UDPUtils.getUdpClient();
+                        udpUtils = SocketUtil.getSocketUtil();
                         udpUtils.addUdpClientListener(this);
                     }
                     udpUtils.config(new UDPConfig.Builder()
@@ -303,21 +302,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     @Override
-    public void onStarted(UDPUtils udpUtils) {
+    public void onStarted(SocketUtil udpUtils) {
 
     }
 
     @Override
-    public void onStoped(UDPUtils udpUtils) {
+    public void onStoped(SocketUtil udpUtils) {
 
     }
 
     @Override
-    public void onSended(UDPUtils udpUtils, UdpMsg udpMsg) {
+    public void onSended(SocketUtil udpUtils, UdpMsg udpMsg) {
     }
 
     @Override
-    public void onReceive(UDPUtils client, UdpMsg msg) {
+    public void onReceive(SocketUtil client, UdpMsg msg) {
         Message message = Message.obtain();
         message.obj = msg;
         handler.sendMessage(message);
@@ -325,7 +324,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onError(UDPUtils client, String msg, Exception e) {
+    public void onError(SocketUtil client, String msg, Exception e) {
     }
 }
 

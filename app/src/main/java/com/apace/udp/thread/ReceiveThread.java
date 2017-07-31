@@ -1,5 +1,7 @@
 package com.apace.udp.thread;
 
+import android.util.Log;
+
 import com.apace.udp.entity.BaseMsg;
 import com.apace.udp.entity.TargetInfo;
 import com.apace.udp.entity.UdpMsg;
@@ -27,6 +29,7 @@ public class ReceiveThread extends Thread {
         if (datagramSocket == null) {
             return;
         }
+        Log.d("onResponse", "ReceiveThread");
         byte[] buff = new byte[1024];
         DatagramPacket pack = new DatagramPacket(buff, buff.length);
         while (!Thread.interrupted()) {
@@ -39,6 +42,9 @@ public class ReceiveThread extends Thread {
                 String msgstr = CharsetUtil.dataToString(res, CharsetUtil.UTF_8);
                 udpMsg.setSourceDataString(msgstr);
                 //接收到消息
+                Log.d("onResponse", udpMsg.toString());
+                notify(udpMsg);
+
 
             } catch (IOException e) {
                 if (!(e instanceof SocketTimeoutException)) {//不是超时报错
@@ -46,5 +52,9 @@ public class ReceiveThread extends Thread {
                 }
             }
         }
+    }
+
+    private void notify(UdpMsg udpMsg) {
+
     }
 }

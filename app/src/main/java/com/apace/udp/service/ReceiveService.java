@@ -3,6 +3,7 @@ package com.apace.udp.service;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.apace.udp.socket.SocketUtil;
 import com.apace.udp.thread.ReceiveThread;
@@ -28,6 +29,7 @@ public class ReceiveService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        Log.d("onResponse", "onStartCommand");
         if (receiveThread == null || !receiveThread.isAlive()) {
             receiveThread = new ReceiveThread(SocketUtil.getSocketUtil().getDatagramSocket());
         }
