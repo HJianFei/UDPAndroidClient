@@ -23,7 +23,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class UDPUtils {
 
-    protected UdpClientConfig mUdpClientConfig;
+    protected UDPConfig mUDPConfig;
     protected List<UdpListener> mUdpListeners;
     private DatagramSocket datagramSocket;
     private SendThread sendThread;
@@ -41,7 +41,7 @@ public class UDPUtils {
 
     private void init() {
         mUdpListeners = new ArrayList<>();
-        mUdpClientConfig = new UdpClientConfig.Builder().create();
+        mUDPConfig = new UDPConfig.Builder().create();
     }
 
     public void closeSocket() {
@@ -59,10 +59,6 @@ public class UDPUtils {
 
     public void stopUdpServer() {
         getReceiveThread().interrupt();
-    }
-
-    public boolean isUdpServerRuning() {
-        return getReceiveThread().isAlive();
     }
 
     public void sendMsg(UdpMsg msg) {
@@ -96,7 +92,7 @@ public class UDPUtils {
             if (datagramSocket != null) {
                 return datagramSocket;
             }
-            int localPort = mUdpClientConfig.getLocalPort();
+            int localPort = mUDPConfig.getLocalPort();
             try {
                 if (localPort > 0) {
                     datagramSocket = UdpSocketManager.getUdpSocket(localPort);
@@ -107,7 +103,7 @@ public class UDPUtils {
                 } else {
                     datagramSocket = new DatagramSocket();
                 }
-                datagramSocket.setSoTimeout((int) mUdpClientConfig.getReceiveTimeout());
+                datagramSocket.setSoTimeout((int) mUDPConfig.getReceiveTimeout());
             } catch (SocketException e) {
                 e.printStackTrace();
                 datagramSocket = null;
@@ -122,7 +118,7 @@ public class UDPUtils {
 
         protected LinkedBlockingQueue<UdpMsg> getMsgQueue() {
             if (msgQueue == null) {
-                msgQueue = new LinkedBlockingQueue<UdpMsg>();
+                msgQueue = new LinkedBlockingQueue<>();
             }
             return msgQueue;
         }
@@ -160,7 +156,7 @@ public class UDPUtils {
                     setSendingMsg(msg);//设置正在发送的
                     byte[] newary = msg.getSourceDataBytes();
                     if (newary == null) {//根据编码转换消息
-                        newary = CharsetUtil.stringToData(msg.getSourceDataString(), mUdpClientConfig.getCharsetName());
+                        newary = CharsetUtil.stringToData(msg.getSourceDataString(), mUDPConfig.getCharsetName());
                     }
                     if (newary != null && newary.length > 0) {
                         try {
@@ -198,7 +194,7 @@ public class UDPUtils {
                     UdpMsg udpMsg = new UdpMsg(res, new TargetInfo(pack.getAddress().getHostAddress(), pack.getPort()),
                             BaseMsg.MsgType.Receive);
                     udpMsg.setTime();
-                    String msgstr = CharsetUtil.dataToString(res, mUdpClientConfig.getCharsetName());
+                    String msgstr = CharsetUtil.dataToString(res, mUDPConfig.getCharsetName());
                     udpMsg.setSourceDataString(msgstr);
                     notifyReceiveListener(udpMsg);
                 } catch (IOException e) {
@@ -220,8 +216,8 @@ public class UDPUtils {
         }
     }
 
-    public void config(UdpClientConfig udpClientConfig) {
-        mUdpClientConfig = udpClientConfig;
+    public void config(UDPConfig UDPConfig) {
+        mUDPConfig = UDPConfig;
     }
 
     public void addUdpClientListener(UdpListener listener) {

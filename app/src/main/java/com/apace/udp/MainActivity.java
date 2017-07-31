@@ -8,10 +8,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -26,8 +28,11 @@ import com.apace.udp.entity.BaseMsg;
 import com.apace.udp.entity.TargetInfo;
 import com.apace.udp.entity.UdpMsg;
 import com.apace.udp.listener.UdpListener;
+import com.apace.udp.socket.SocketUtil;
+import com.apace.udp.utils.ByteUtil;
 import com.apace.udp.utils.ImageUtils;
 import com.apace.udp.utils.StringValidationUtils;
+import com.apace.udp.utils.Utils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -37,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private UDPUtils udpUtils;
+    private SocketUtil socketUtil;
     private EditText input_ip_port;
     private EditText input_text;
     private Button btnSend;
@@ -46,16 +52,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-
             UdpMsg message = (UdpMsg) msg.obj;
             list.add(message.getSourceDataString());
+            Log.d("onResponse", message.getSourceDataString());
             mAdapter.notifyDataSetChanged();
-//            imageView.setImageBitmap(ImageUtils.getBitmapFromByte(message.getSourceDataBytes()));
         }
     };
     private ImageView imageView;
     private Button show_dialog;
-
+    private PowerManager.WakeLock wakeLock = null;
     /* 请求识别码 */
     private static final int CODE_GALLERY_REQUEST = 0xa0;
     private static final int CODE_CAMERA_REQUEST = 0xa1;
@@ -113,9 +118,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         udpUtils = UDPUtils.getUdpClient();
                         udpUtils.addUdpClientListener(this);
                     }
-                    udpUtils.config(new UdpClientConfig.Builder()
+                    udpUtils.config(new UDPConfig.Builder()
                             .setLocalPort(Integer.parseInt(temp2[1])).create());
-                    udpUtils.sendMsg(new UdpMsg(text, targetInfo, BaseMsg.MsgType.Send));
+                    byte[] bytes = Utils.packBytes(System.currentTimeMillis(), 1, "192.168.1.56", "192.168.1.190", "文本", ByteUtil.getBytes(text), 0, 18);
+                    udpUtils.sendMsg(new UdpMsg(bytes, targetInfo, BaseMsg.MsgType.Send));
                 }
                 break;
             case R.id.show_dialog:
@@ -262,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         udpUtils = UDPUtils.getUdpClient();
                         udpUtils.addUdpClientListener(this);
                     }
-                    udpUtils.config(new UdpClientConfig.Builder()
+                    udpUtils.config(new UDPConfig.Builder()
                             .setLocalPort(Integer.parseInt(temp2[1])).create());
                     udpUtils.sendMsg(new UdpMsg(bitmapByte, targetInfo, BaseMsg.MsgType.Send));
                 }
@@ -315,6 +321,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Message message = Message.obtain();
         message.obj = msg;
         handler.sendMessage(message);
+
     }
 
     @Override

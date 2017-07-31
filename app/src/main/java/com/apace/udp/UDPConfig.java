@@ -5,12 +5,12 @@ import com.apace.udp.utils.CharsetUtil;
 /**
  * UDP配置
  */
-public class UdpClientConfig {
+public class UDPConfig {
     private String charsetName = CharsetUtil.UTF_8;//默认编码
     private long receiveTimeout = 10000;//接受消息的超时时间,0为无限大
     private int localPort = -1;
 
-    private UdpClientConfig() {
+    private UDPConfig() {
     }
 
     public String getCharsetName() {
@@ -27,13 +27,13 @@ public class UdpClientConfig {
     }
 
     public static class Builder {
-        private UdpClientConfig mTcpConnConfig;
+        private UDPConfig mTcpConnConfig;
 
         public Builder() {
-            mTcpConnConfig = new UdpClientConfig();
+            mTcpConnConfig = new UDPConfig();
         }
 
-        public UdpClientConfig create() {
+        public UDPConfig create() {
             return mTcpConnConfig;
         }
 
