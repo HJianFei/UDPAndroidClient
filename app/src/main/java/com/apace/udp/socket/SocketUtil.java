@@ -2,14 +2,11 @@ package com.apace.udp.socket;
 
 import com.apace.udp.UDPConfig;
 import com.apace.udp.entity.UdpMsg;
-import com.apace.udp.listener.UdpListener;
 import com.apace.udp.manager.UdpSocketManager;
 import com.apace.udp.thread.SendThread;
 
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by HJianFei at 2017/7/29
@@ -20,7 +17,6 @@ public class SocketUtil {
     private DatagramSocket datagramSocket = null;
     protected static UDPConfig mUDPConfig;
     private static SocketUtil socketUtil;
-    private List<UdpListener> mUdpListeners;
     private SendThread sendThread;
 
 
@@ -44,7 +40,6 @@ public class SocketUtil {
 
         //初始化配置信息
         mUDPConfig = new UDPConfig.Builder().create();
-        mUdpListeners = new ArrayList<>();
     }
 
 
@@ -122,26 +117,5 @@ public class SocketUtil {
      */
     public void config(UDPConfig UDPConfig) {
         mUDPConfig = UDPConfig;
-    }
-
-    /**
-     * 添加UDP监听器
-     *
-     * @param listener
-     */
-    public void addUdpClientListener(UdpListener listener) {
-        if (mUdpListeners.contains(listener)) {
-            return;
-        }
-        this.mUdpListeners.add(listener);
-    }
-
-    /**
-     * 移除UDP监听器
-     *
-     * @param listener
-     */
-    public void removeUdpClientListener(UdpListener listener) {
-        this.mUdpListeners.remove(listener);
     }
 }

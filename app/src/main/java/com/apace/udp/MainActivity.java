@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -27,7 +26,6 @@ import com.apace.udp.adapter.SimpleAdapter;
 import com.apace.udp.entity.BaseMsg;
 import com.apace.udp.entity.TargetInfo;
 import com.apace.udp.entity.UdpMsg;
-import com.apace.udp.listener.UdpListener;
 import com.apace.udp.service.ReceiveService;
 import com.apace.udp.socket.SocketUtil;
 import com.apace.udp.utils.ImageUtils;
@@ -37,11 +35,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, UdpListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
 
     private SocketUtil udpUtils;
-    private SocketUtil socketUtil;
     private EditText input_ip_port;
     private EditText input_text;
     private Button btnSend;
@@ -59,7 +56,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     };
     private ImageView imageView;
     private Button show_dialog;
-    private PowerManager.WakeLock wakeLock = null;
     /* 请求识别码 */
     private static final int CODE_GALLERY_REQUEST = 0xa0;
     private static final int CODE_CAMERA_REQUEST = 0xa1;
@@ -94,9 +90,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (udpUtils != null) {
-            udpUtils.removeUdpClientListener(this);
-        }
     }
 
     @Override
@@ -116,7 +109,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     targetInfo = new TargetInfo(temp2[0], Integer.parseInt(temp2[1]));
                     if (udpUtils == null) {
                         udpUtils = SocketUtil.getSocketUtil();
-                        udpUtils.addUdpClientListener(this);
                     }
                     udpUtils.config(new UDPConfig.Builder()
                             .setLocalPort(Integer.parseInt(temp2[1])).create());
@@ -265,7 +257,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     targetInfo = new TargetInfo(temp2[0], Integer.parseInt(temp2[1]));
                     if (udpUtils == null) {
                         udpUtils = SocketUtil.getSocketUtil();
-                        udpUtils.addUdpClientListener(this);
                     }
                     udpUtils.config(new UDPConfig.Builder()
                             .setLocalPort(Integer.parseInt(temp2[1])).create());
@@ -300,31 +291,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startActivityForResult(intent, CODE_RESULT_REQUEST);
     }
 
-
-    @Override
-    public void onStarted(SocketUtil udpUtils) {
-
-    }
-
-    @Override
-    public void onStoped(SocketUtil udpUtils) {
-
-    }
-
-    @Override
-    public void onSended(SocketUtil udpUtils, UdpMsg udpMsg) {
-    }
-
-    @Override
-    public void onReceive(SocketUtil client, UdpMsg msg) {
-        Message message = Message.obtain();
-        message.obj = msg;
-        handler.sendMessage(message);
-
-    }
-
-    @Override
-    public void onError(SocketUtil client, String msg, Exception e) {
-    }
 }
 

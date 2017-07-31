@@ -34,7 +34,9 @@ public class ReceiveThread extends Thread {
         DatagramPacket pack = new DatagramPacket(buff, buff.length);
         while (!Thread.interrupted()) {
             try {
+                Log.d("onResponse", "receive...");
                 datagramSocket.receive(pack);
+                Log.d("onResponse", "receiving...");
                 byte[] res = Arrays.copyOf(buff, pack.getLength());
                 UdpMsg udpMsg = new UdpMsg(res, new TargetInfo(pack.getAddress().getHostAddress(), pack.getPort()),
                         BaseMsg.MsgType.Receive);
@@ -42,19 +44,11 @@ public class ReceiveThread extends Thread {
                 String msgstr = CharsetUtil.dataToString(res, CharsetUtil.UTF_8);
                 udpMsg.setSourceDataString(msgstr);
                 //接收到消息
-                Log.d("onResponse", udpMsg.toString());
-                notify(udpMsg);
-
-
             } catch (IOException e) {
                 if (!(e instanceof SocketTimeoutException)) {//不是超时报错
 
                 }
             }
         }
-    }
-
-    private void notify(UdpMsg udpMsg) {
-
     }
 }

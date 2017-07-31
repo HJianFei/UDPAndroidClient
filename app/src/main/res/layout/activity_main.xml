@@ -23,8 +23,8 @@
                     android:id="@+id/input_ip_port"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="IP+端口:192.168.1.58:8989"
-                    android:text="192.168.1.58:8989" />
+                    android:hint="IP+端口:192.168.1.63:8989"
+                    android:text="192.168.1.63:8989" />
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
