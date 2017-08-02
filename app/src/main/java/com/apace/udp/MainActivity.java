@@ -30,6 +30,7 @@ import com.apace.udp.service.ReceiveService;
 import com.apace.udp.socket.SocketUtil;
 import com.apace.udp.utils.ImageUtils;
 import com.apace.udp.utils.StringValidationUtils;
+import com.apace.udp.utils.UdpUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -112,7 +113,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                     udpUtils.config(new UDPConfig.Builder()
                             .setLocalPort(Integer.parseInt(temp2[1])).create());
-                    udpUtils.sendMsg(new UdpMsg(text, targetInfo, BaseMsg.MsgType.Send));
+                    List<byte[]> bytes = UdpUtils.Chat.contentToByte(1, 1, 1, text);
+                    for (byte[] b : bytes) {
+                        udpUtils.sendMsg(new UdpMsg(b, targetInfo, BaseMsg.MsgType.Send));
+                    }
+//                    udpUtils.sendMsg(new UdpMsg(text, targetInfo, BaseMsg.MsgType.Send));
                 }
                 break;
             case R.id.show_dialog:
